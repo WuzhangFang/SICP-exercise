@@ -1,0 +1,26 @@
+;;; Exercise 2.68
+(load "huffman-tree.scm")
+(define (encode message tree)
+  (if (null? message)
+    '()
+    (append
+      (encode-symbol (car message) tree)
+      (encode (cdr message) tree))))
+(define (encode-symbol symbol tree)
+  (cond ((leaf? tree) '())
+	((symbol-in-tree? symbol (left-branch tree))
+	 (cons 0 (encode-symbol symbol (left-branch tree))))
+	((symbol-in-tree? symbol (right-branch tree))
+	 (cons 1 (encode-symbol symbol (right-branch tree))))
+	(else (error "This symbol is not in the tree: " symbol))))
+(define (symbol-in-tree? symbol tree)
+  (member symbol (symbols tree)))	
+(load "huffman-tree.scm")
+(define sample-tree
+    (make-code-tree (make-leaf 'A 4)
+		    (make-code-tree (make-leaf 'B 2)
+				    (make-code-tree
+				      (make-leaf 'D 1)
+				      (make-leaf 'C 1)))))
+(symbols sample-tree)
+(encode '(a b c d) sample-tree)

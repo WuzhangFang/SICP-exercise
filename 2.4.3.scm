@@ -1,0 +1,80 @@
+;; 2.4.3 Data-directed programming and additivity
+;; implement the interface as a single procedure that looks up the combination
+;; of the operation name and argument type in the table to fing the correct
+;; procedure to apply, and then applies it to the contents of arguments. To add
+;; a new representation package to the system we need not change any existing 
+;; procedures; we need only add new entries to the table.
+;; (put <op> <type> <item>): installs the <item> in the table, 
+;; indexed by <op> and <type>
+;; (get <op> <type>): looks up the <op> and <type> in the table and returns the item
+(load "apply-generic.scm")
+(define (attach-tag type-tag contents)
+    (cons type-tag contents))
+(define (type-tag datum)
+    (if (pair? datum)
+        (car datum)
+        (error "Bad tagged datum: TYPE-TAG" datum)))
+(define (contents datum)
+    (if (pair? datum)
+        (cdr datum)
+        (error "Bad tagged datum: CONTENTS" datum)))
+;; Ben's representation
+(define (install-rectangular-package)
+    (define (real-part z) (car z))
+    (define (imag-part z) (cdr z))
+    (define (magnitude z)
+        (sqrt (+ (square (real-part z))
+                 (square (imag-part z)))))
+    (define (angle z)
+      (atan (imag-part z) (real-part z)))
+    (define (make-from-real-imag x y)
+       (cons x y))
+    (define (make-from-mag-ang r a)
+       (cons (* r (cos a) (* r (sin a)))))
+    (define (tag x)
+        (attach-tag 'rectangular x))
+    (put 'real-part '(rectangular) real-part)
+    (put 'imag-part '(rectangular) imag-part)
+    (put 'magnitude '(rectangular) magnitude)
+    (put 'angle '(rectangular) angle)
+    (put 'make-from-real-imag 'rectangular
+        (lambda (x y) (tag (make-from-real-imag x y))))
+    (put 'make-from-mag-ang 'rectangular
+        (lambda (r a) (tag (make-from-mag-ang r a))))
+    'done)
+;; Alyssa's representation
+(define (install-polar-package)
+    (define (magnitude z) (car z))
+    (define (angle z) (cdr z))
+    (define (real-part z)
+        (* (magnitude z) (cos (angle z))))
+    (define (imag-part z)
+        (* (magnitude z) (sin (angle z))))
+    (define (make-from-mag-ang r a)
+       (cons r a))
+    (define (make-from-real-imag x y)
+       (cons (sqrt (+ (square x) (square y)))
+             (atan y x)))
+    (define (tag x)
+        (attach-tag 'polar x))
+    (put 'real-part '(polar) real-part)
+    (put 'imag-part '(polar) imag-part)
+    (put 'magnitude '(polar) magnitude)
+    (put 'angle '(polar) angle)
+    (put 'make-from-real-imag 'polar
+        (lambda (x y) (tag (make-from-real-imag x y))))
+    (put 'make-from-mag-ang 'polar
+        (lambda (r a) (tag (make-from-mag-ang r a))))
+    'done)
+(define (real-part z)
+    (apply-generic 'real-part z))
+(define (imag-part z)
+    (apply-generic 'imag-part z))
+(define (magnitude z)
+    (apply-generic 'magnitude z))
+(define (angle z)
+    (apply-generic 'angle z))
+(define (make-from-real-imag x y)
+    ((get 'make-from-real-imag 'rectangular) x y))
+(define (make-from-mag-ang r a)
+    ((get 'make-from-mag-ang 'polar) r a))

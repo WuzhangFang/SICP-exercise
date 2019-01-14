@@ -1,0 +1,10 @@
+;;; Exercise 2.27
+(define x (list (list 1 2) (list 3 4)))
+(define (deep-reverse lst)
+    (define (reverse-iter rest result)
+        (cond ((null? rest) result)
+              ((pair? (car rest)) (reverse-iter (cdr rest) (cons (reverse (car rest)) result)))
+              (else (reverse-iter (cdr test) (cons (car rest) result)))))
+    (reverse-iter lst (list)))
+(reverse x)
+(deep-reverse x)

@@ -1,0 +1,52 @@
+;; Exercise 2.73
+;; modify the differentiation to data directed style
+;; (put <op> <type> <item>): installs the <item> in the table,
+;; indexed by <op> and <type>
+;; (get <op> <type>): looks up the <op> and <type> in the table and returns the item
+(define (deriv expr var)
+  (cond ((number? expr) 0)
+	((variable? expr)
+	 	(if (same-variable? expr var)
+		  1
+		  0))
+	(else ((get 'deriv (operator expr))
+	       (operands expr)
+	       var))))
+(define (operator expr) (car expr))
+(define (operands expr) (cdr expr))
+;; install deriv-sum package
+(define (install-sum-package)
+  (define (addend s) (cadr s))
+  (define (augend s) (caddr s))
+  (define (make-sum x y)
+    (cond ((=number? x 0) y)
+	  ((=number? y 0) x)
+	  ((and (number? x) (number? y)) (+ x y))
+	  (else (list '+ x y))))
+  (define (deriv expr var)
+    (make-sum (deriv (addend expr) var)
+	      (deriv (augend expr) var)))
+  (put 'addend '+ addend)
+  (put 'augend '+ augend)
+  (put 'deriv  '+ deriv)
+  'done)
+;; install deriv-product package
+(define (install-product-package)
+  (define (multiplier s) (cadr s))
+  (define (multiplicand s) (caddr s))
+  (define (make-product x y)
+    (cond ((or (=number? x 0) (=number? y 0)) 0)
+          ((=number? x 1) y)
+	  ((=number? y 1) x)
+	  ((and (number? x) (number? y)) (* x y))
+	  (else (list '+ x y))))
+  (define (deriv expr var)
+    (make-sum 
+      (make-product (multiplier expr) 
+		    (deriv (multiplicand expr) var))
+      (make-product (deriv (multiplier expr) var)
+		    (multiplicand expr))))
+  (put 'multiplier   '* multiplier)
+  (put 'multiplicand '* multiplicand)
+  (put 'deriv        '* deriv)
+  'done)

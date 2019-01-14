@@ -1,0 +1,13 @@
+;;; Exercise 2.5
+(load "exponential.scm")
+(define (cons-1 a b) (* (fast-expt 2 a) (fast-expt 3 b)))
+(define (car-1 z) 
+    (if (= 0 (remainder z 2))
+        (+ 1 (car-1 (/ z 2)))
+        0))
+(define (cdr-1 z) 
+    (if (= 0 (remainder z 3))
+        (+ 1 (car-1 (/ z 3)))
+        0))
+(car-1 (cons-1 2 3))
+(cdr-1 (cons-1 2 3))

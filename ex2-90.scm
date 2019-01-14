@@ -1,0 +1,42 @@
+;; Exercise 2.90
+;; two representations: one for sparse and the other one for dense
+(load "apply-generic.scm")
+;; constructor make-term is same for both representations
+(define (make-term order coeff) (list order coeff))
+(define (order term) (car term))
+(define (coeff term) (cadr term))
+(define (the-empty-termlist) '())
+;; generic operations
+(define (first-term term-list) (apply-generic 'first-term term-list))
+(define (rest-terms term-list) (apply-generic 'rest-terms term-list))
+(define (empty-termlist? term-list) (apply-generic 'empty-termlist? term-list))
+(define (adjoin-term term termlist)
+  ((get 'adjoin-term (type-tag term-list)) term (contents term-list)))
+;; sparse package
+(define (install-sparse-polynomial-package)
+  (define (tag x)
+    (attach-tag 'sparse x))
+  (define (adjoin-term term term-list)
+      (if (=zero? (coeff term))
+	  term-list
+	 (cons term term-list)))
+  (put 'first-term '(sparse) car)
+  (put 'rest-terms '(sparse) cdr)
+  (put 'empty-termlist? '(sparse) null?)
+  (put 'adjoin-term '(dense) adjoin-term)
+  'done)
+;; dense package
+(define (install-dense-polynomial-package)
+  (define (tag x)
+    (attach-tag 'dense x))
+  (define (adjoin-term term term-list)
+      (cond ((=zero? term) term-list)
+	    ((= (order term) (length term-list)) 
+	     (cons (coeff term) term-list))
+	    (else (adjoin-term term (cons 0 term-list)))))
+  (put 'first-term '(dense) 
+       (lambda (t) (make-term (- (length t) 1) (car t))))
+  (put 'rest-terms '(dense) cdr)
+  (put 'empty-termlist? '(dense) null?)
+  (put 'adjoin-term '(dense) adjoin-term) 
+  'done)

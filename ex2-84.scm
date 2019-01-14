@@ -1,0 +1,28 @@
+;; Exercise 2.84
+(load "ex2-83.scm")
+(define (higher? type1 type2)
+  (define (type-label type)
+    (cond ((eq? type 'integer) 1)
+	  ((eq? type 'rational) 2)
+	  ((eq? type 'real) 3)
+	  ((eq? type 'complex) 4)
+	  (else (error "No such a type"))))
+  (- (type-label type1) (type-label type2)))
+;; modify the apply-generic procedure
+;; for simplicity, take only two arguments
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (define (no-method)
+      (error "No method for these types" (list op type-tags)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	(apply proc (map contents args))
+	(if (= (length args) 2)
+	  (let ((type1 (car type-tags))
+		(type2 (cdr type-tags))
+		(a1 (car args))
+		(a2 (cdr args)))
+	    (let ((diff (higher? type1 type2)))
+	      (cond ((> 0 diff) (apply-generic op (raise a1) a2))
+		    ((< 0 diff) (apply-generic op a1 (raise a2))))))
+	  (no-method))))))
