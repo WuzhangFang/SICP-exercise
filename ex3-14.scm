@@ -12,13 +12,7 @@
 (define w (mystery v))
 v
 w
-; box-and-pointer diagram
-;
-; v: [*][*]----->[*][*]----->[*][*]----->'()
-;     |           |           |
-;     v           v           v
-;    'a          'b          'c
-;
+; test
 ; (loop (list 'a 'b 'c) '())
 ; (let ((temp (list 'b 'c)))
 ;   (set-cdr! (list 'a 'b 'c) '())
