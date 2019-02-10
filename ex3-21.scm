@@ -1,0 +1,13 @@
+;; Exercise 3.21
+(load "3.3.2.scm")
+(define (print-queue q)
+  (car q))
+(define q1 (make-queue))
+(insert-queue! q1 'a)
+(print-queue q1)
+(insert-queue! q1 'b)
+(print-queue q1)
+(delete-queue! q1)
+(print-queue q1)
+(delete-queue! q1)
+(print-queue q1)
