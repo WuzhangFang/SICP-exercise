@@ -43,7 +43,7 @@
 	    (if record (car record) false))
 	  false)))
     (define (insert! key-1 key-2 value)
-      (let ((subtable (assoc key1 (car local-table))))
+      (let ((subtable (assoc key1 (cdr local-table))))
 	(if subtable
 	  (let ((record (assoc key-2 (cdr subtable))))
 	    (if record
