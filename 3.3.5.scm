@@ -1,16 +1,6 @@
-MIT/GNU Scheme running under GNU/Linux
-Type `^C' (control-C) followed by `H' to obtain information about interrupts.
-
-Copyright (C) 2011 Massachusetts Institute of Technology
-This is free software; see the source for copying conditions. There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-Image saved on Tuesday February 6, 2018 at 6:31:25 PM
-  Release 9.1.1     || Microcode 15.3 || Runtime 15.7 || SF 4.41
-  LIAR/x86-64 4.118 || Edwin 3.116
-
-1 ]=> ;; 3.3.5 Propagation of constraints
+;; 3.3.5 Propagation of constraints
 ;; Implementing the constraint system
+;; primitive constraint constructors: adder, multiplier, constant
 ; adder
 (define (adder a1 a2 sum)
   (define (process-new-value)
@@ -48,17 +38,11 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
   (connect a2 me)
   (connect sum me)
   me)
-;Value: adder
-
-1 ]=> (define (inform-about-value constraint)
+(define (inform-about-value constraint)
   (constraint 'I-have-a-value))
-;Value: inform-about-value
-
-1 ]=> (define (inform-about-no-value constraint)
+(define (inform-about-no-value constraint)
   (constraint 'I-lost-a-value))
-;Value: inform-about-no-value
-
-1 ]=> ; multiplier
+; multiplier
 (define (multiplier m1 m2 product)
   (define (process-new-value)
     (cond ((or (and (has-value? m1)
@@ -75,14 +59,14 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
           ((and (has-value? m1)
 		(has-value? product))
 	   (set-value! m2 
-		       (/ (get-value sum)
-			  (get-value a1))
+		       (/ (get-value product)
+			  (get-value m1))
 		       me))
           ((and (has-value? m2)
 		(has-value? product))
 	   (set-value! m1 
 		       (/ (get-value product)
-			  (get-value a2))
+			  (get-value m2))
 		       me))))
   (define (process-forget-value)
     (forget-value! product me)
@@ -100,18 +84,14 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
   (connect m2 me)
   (connect product me)
   me)
-;Value: multiplier
-
-1 ]=> ;; constant constructor
+;; constant constructor
 (define (constant value connector)
   (define (me request)
     (error "Unknown request: CONSTANT" request))
   (connect connector me)
   (set-value! connector value me)
   me)
-;Value: constant
-
-1 ]=> ;; probe
+;; probe
 (define (probe name connector)
   (define (print-probe value)
     (newline) (display "Probe: ")
@@ -129,9 +109,7 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
 	  (else (error "Unknown request: PROBE" request))))
   (connect connector me)
   me)
-;Value: probe
-
-1 ]=> ;; connector
+;; connector
 (define (make-connector)
   (let ((value false)
 	(informant false)
@@ -168,9 +146,7 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
 	     connect)
 	    (else (error "Unknown operation: CONNECTOR" request))))
     me))
-;Value: make-connector
-
-1 ]=> (define (for-each-except exception procedure list)
+(define (for-each-except exception procedure list)
   (define (loop items)
     (cond ((null? items) 'done)
 	  ((eq? (car items) exception)
@@ -178,37 +154,20 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
 	  (else (procedure (car items))
 		(loop (cdr items)))))
   (loop list))
-;Value: for-each-except
-
-1 ]=> ;; procedures
+;; procedures
 (define (has-value? connector)
   (connector 'has-value?))
-;Value: has-value?
-
-1 ]=> (define (get-value connector)
+(define (get-value connector)
   (connector 'value))
-;Value: get-value
-
-1 ]=> (define (set-value! connector new-value informant)
+(define (set-value! connector new-value informant)
   ((connector 'set-value!) new-value informant))
-;Value: set-value!
-
-1 ]=> (define (forget-value! connector retractor)
+(define (forget-value! connector retractor)
   ((connector 'forget) retractor))
-;Value: forget-value!
-
-1 ]=> (define (connect connector new-constraint)
+(define (connect connector new-constraint)
   ((connector 'connect) new-constraint))
-;Value: connect
-
-1 ]=> ;; test
+;; test
 (define C (make-connector))
-;Value: c
-
-1 ]=> (define F (make-connector))
-;Value: f
-
-1 ]=> ;; primitive constraint constructors: adder, multiplier, constant
+(define F (make-connector))
 (define (celsius-fahrenheit-converter c f)
   (let ((u (make-connector))
 	(v (make-connector))
@@ -222,25 +181,7 @@ Image saved on Tuesday February 6, 2018 at 6:31:25 PM
     (constant 5 x)
     (constant 32 y)
     'ok))
-;Value: celsius-fahrenheit-converter
-
-1 ]=> (celsius-fahrenheit-converter C F)
-;Value: ok
-
-1 ]=> (probe "Celsius temp" C)
-;Value 13: #[compound-procedure 13 me]
-
-1 ]=> (probe "Fahrenheit temp" F)
-;Value 14: #[compound-procedure 14 me]
-
-1 ]=> (set-value! C 25 'user)
-Probe: Celsius temp= 25
-;Unbound variable: a2
-;To continue, call RESTART with an option number:
-; (RESTART 3) => Specify a value to use instead of a2.
-; (RESTART 2) => Define a2 to a given value.
-; (RESTART 1) => Return to read-eval-print level 1.
-
-2 error> 
-End of input stream reached.
-Moriturus te saluto.
+(celsius-fahrenheit-converter C F)
+(probe "Celsius temp" C)
+(probe "Fahrenheit temp" F)
+(set-value! C 25 'user)
