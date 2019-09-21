@@ -15,7 +15,9 @@
     (stream-car s)
     (stream-ref (stream-cdr s) (- n 1))))
 
-(define (stream-map proc . argstreams)                               (if (stream-null? (car argstreams))                                 the-empty-stream
+(define (stream-map proc . argstreams)                              
+ (if (stream-null? (car argstreams))                                 
+    the-empty-stream
     (cons-stream
      (apply proc (map stream-car argstreams))
      (apply stream-map
@@ -56,4 +58,9 @@
 (define (scale-stream stream factor)
   (stream-map 
     (lambda (x) (* x factor)) stream))
-
+;; display first n terms of an infinite stream
+(define (show-stream s n)
+  (if (zero? n)
+      (display-line "done")
+      (begin (display-line (stream-car s))
+             (show-stream (stream-cdr s) (- n 1)))))
