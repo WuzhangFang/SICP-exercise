@@ -1,0 +1,9 @@
+;; Exercise 3.68
+;; Louis Reasoner
+;;
+(define (pairs s t)
+      (interleave
+        (stream-map (lambda (x)
+                      (list (stream-car s) x))
+                    t)
+        (pairs (stream-cdr s) (stream-cdr t))))
