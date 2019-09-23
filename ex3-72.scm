@@ -1,0 +1,13 @@
+;; Exercise 3.72
+(load "ex3-70.scm")
+(load "3.5.scm")
+(define (weight ij)
+    (+ (square (car ij)) (square (cadr ij))))
+(define square-integers (weighted-pairs integers integers weight))
+(define (generate-square s)
+    (let ((first (stream-car s))
+          (second (stream-car (stream-cdr s)))
+          (third (stream-car (stream-cdr (stream-cdr s)))))
+        (if (= (weight first) (weight second) (weight third))
+            (cons-stream (weight first) (generate-square (stream-cdr s)))
+            (generate-square (stream-cdr s)))))
