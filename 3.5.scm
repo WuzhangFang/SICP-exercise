@@ -64,3 +64,14 @@
       (display-line "done")
       (begin (display-line (stream-car s))
              (show-stream (stream-cdr s) (- n 1)))))
+;; integral procedure: required delayed integrand
+(define (integral delayed-integrand initial-value dt)
+    (define int
+        (cons-stream
+         initial-value
+         (let ((integrand
+                (force delayed-integrand)))
+            (add-streams
+                (scale-stream integrand dt)
+                int))))
+int)
